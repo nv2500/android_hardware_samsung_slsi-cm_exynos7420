@@ -78,6 +78,11 @@ extern int gralloc_lock(gralloc_module_t const* module,
                         int l, int t, int w, int h,
                         void** vaddr);
 
+extern int gralloc_lock_ycbcr(gralloc_module_t const* module,
+                        buffer_handle_t handle, int usage,
+                        int l, int t, int w, int h,
+                        struct android_ycbcr *ycbcr);
+
 extern int gralloc_unlock(gralloc_module_t const* module,
                           buffer_handle_t handle);
 
@@ -107,6 +112,7 @@ struct private_module_t HAL_MODULE_INFO_SYM = {
     .registerBuffer = gralloc_register_buffer,
     .unregisterBuffer = gralloc_unregister_buffer,
     .lock = gralloc_lock,
+    .lock_ycbcr = gralloc_lock_ycbcr,
     .unlock = gralloc_unlock,
 },
 .framebuffer = 0,
@@ -251,6 +257,10 @@ static int gralloc_alloc_framework_yuv(int ionfd, int w, int h, int format,
             *stride = w;
             size = *stride * ALIGN(h, 16) * 3 / 2 + ext_size;
             break;
+        // See gralloc.h:
+        // "If format is HAL_PIXEL_FORMAT_YCbCr_420_888, the returned stride must be 0"
+        case HAL_PIXEL_FORMAT_YCbCr_420_888:
+            *stride = 0;
         default:
             ALOGE("invalid yuv format %d\n", format);
             return -EINVAL;
@@ -275,7 +285,8 @@ static int gralloc_alloc_yuv(int ionfd, int w, int h, int format,
 
     *stride = ALIGN(w, 16);
 
-    if (format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+    if (format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED ||
+        format == HAL_PIXEL_FORMAT_YCbCr_420_888) {
         ALOGV("HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED : usage(%x), flags(%x)\n", usage, ion_flags);
         if ((usage & GRALLOC_USAGE_HW_CAMERA_ZSL) == GRALLOC_USAGE_HW_CAMERA_ZSL) {
             format = HAL_PIXEL_FORMAT_YCbCr_422_I; // YUYV
@@ -283,6 +294,10 @@ static int gralloc_alloc_yuv(int ionfd, int w, int h, int format,
             format = HAL_PIXEL_FORMAT_EXYNOS_YV12_M;
         } else if (usage & GRALLOC_USAGE_HW_VIDEO_ENCODER) {
             format = HAL_PIXEL_FORMAT_EXYNOS_YCbCr_420_SP_M; // NV12M
+        } else if (format == HAL_PIXEL_FORMAT_YCbCr_420_888) {
+            // If no other usage flags are detected, default the
+            // flexible YUV format to NV21.
+            format = HAL_PIXEL_FORMAT_YCrCb_420_SP;
         }
     }
     if (usage & GRALLOC_USAGE_PROTECTED)
