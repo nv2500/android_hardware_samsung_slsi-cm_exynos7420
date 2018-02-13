@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ifeq ($(TARGET_BOOTLOADER_BOARD_NAME), universal7420)
+ifeq ($(TARGET_BOOTLOADER_BOARD_NAME), xyref5433)
 
 LOCAL_PATH:= $(call my-dir)
 
@@ -23,9 +23,8 @@ include $(CLEAR_VARS)
 
 LOCAL_SHARED_LIBRARIES:= libutils libcutils libbinder liblog libcamera_client libhardware
 LOCAL_SHARED_LIBRARIES += libexynosutils libhwjpeg libexynosv4l2 libexynosgscaler libion_exynos libcsc
-LOCAL_SHARED_LIBRARIES += libexpat
+LOCAL_SHARED_LIBRARIES += libexpat libstlport
 LOCAL_SHARED_LIBRARIES += libpower
-LOCAL_SHARED_LIBRARIES += libui libhidlbase android.hardware.graphics.bufferqueue@1.0
 
 LOCAL_CFLAGS += -DGAIA_FW_BETA
 LOCAL_CFLAGS += -DMAIN_CAMERA_SENSOR_NAME=$(BOARD_BACK_CAMERA_SENSOR)
@@ -36,15 +35,12 @@ endif
 LOCAL_CFLAGS += -DUSE_CAMERA_ESD_RESET
 LOCAL_CFLAGS += -DBACK_ROTATION=$(BOARD_BACK_CAMERA_ROTATION)
 LOCAL_CFLAGS += -DFRONT_ROTATION=$(BOARD_FRONT_CAMERA_ROTATION)
-ifeq ($(BOARD_CAMERA_HAS_BURST_CAPTURE),true)
-    LOCAL_CFLAGS += -DBURST_CAPTURE
-endif
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../include \
 	$(LOCAL_PATH)/../libcamera \
-	$(TOP)/hardware/samsung_slsi-cm/$(TARGET_SOC)/libcamera \
-	$(TOP)/hardware/samsung_slsi-cm/$(TARGET_SOC)/libcamera/JpegEncoderForCamera \
+	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/54xx \
+	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/54xx/JpegEncoderForCamera \
 	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/common \
 	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/common/Pipes \
 	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/common/Activities \
@@ -58,15 +54,7 @@ LOCAL_C_INCLUDES += \
 	$(TOP)/vendor/samsung/feature/CscFeature/libsecnativefeature \
 	$(TOP)/bionic \
 	$(TOP)/external/expat/lib \
-	system/libhidl/transport/token/1.0/utils/include \
-	system/libhidl/base/include \
-	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include \
-	$(TOP)/frameworks/native/libs/arect/include \
-	$(TOP)/frameworks/native/libs/nativebase/include \
-	$(TOP)/frameworks/native/libs/nativewindow/include
-
-LOCAL_ADDITIONAL_DEPENDENCIES += \
-	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+	$(TOP)/external/stlport/stlport
 
 LOCAL_SRC_FILES:= \
 	ExynosCameraSensorInfo.cpp \
@@ -92,15 +80,15 @@ LOCAL_SRC_FILES:= \
 	../../exynos/libcamera/common/Activities/ExynosCameraActivityFlash.cpp \
 	../../exynos/libcamera/common/Activities/ExynosCameraActivitySpecialCapture.cpp \
 	../../exynos/libcamera/common/Activities/ExynosCameraActivityUCTL.cpp \
-	../../$(TARGET_SOC)/libcamera/JpegEncoderForCamera/ExynosJpegEncoderForCamera.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCamera.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCameraParameters.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCameraFrameFactory.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCameraFrameReprocessingFactory.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCameraFrameFactoryFront.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCameraActivityControl.cpp\
-	../../$(TARGET_SOC)/libcamera/ExynosCameraUtilsModule.cpp \
-	../../$(TARGET_SOC)/libcamera/ExynosCameraScalableSensor.cpp
+	../../exynos/libcamera/54xx/JpegEncoderForCamera/ExynosJpegEncoderForCamera.cpp \
+	../../exynos/libcamera/54xx/ExynosCamera.cpp \
+	../../exynos/libcamera/54xx/ExynosCameraParameters.cpp \
+	../../exynos/libcamera/54xx/ExynosCameraFrameFactory.cpp \
+	../../exynos/libcamera/54xx/ExynosCameraFrameReprocessingFactory.cpp \
+	../../exynos/libcamera/54xx/ExynosCameraFrameFactoryFront.cpp \
+	../../exynos/libcamera/54xx/ExynosCameraActivityControl.cpp\
+	../../exynos/libcamera/54xx/ExynosCameraUtilsModule.cpp \
+	../../exynos/libcamera/54xx/ExynosCameraScalableSensor.cpp
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libexynoscamera
@@ -120,8 +108,8 @@ LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../include \
 	$(LOCAL_PATH)/../libcamera \
 	$(LOCAL_PATH)/../libcamera/Vendor \
-	$(TOP)/hardware/samsung_slsi-cm/$(TARGET_SOC)/libcamera \
-	$(TOP)/hardware/samsung_slsi-cm/$(TARGET_SOC)/libcamera/JpegEncoderForCamera \
+	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/54xx \
+	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/54xx/JpegEncoderForCamera \
 	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/common \
 	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/common/Pipes \
 	$(TOP)/hardware/samsung_slsi-cm/exynos/libcamera/common/Activities \
@@ -131,13 +119,7 @@ LOCAL_C_INCLUDES += \
 	$(TOP)/hardware/samsung_slsi-cm/$(TARGET_BOARD_PLATFORM)/include \
 	$(TOP)/hardware/samsung_slsi-cm/$(TARGET_BOARD_PLATFORM)/libcamera \
 	frameworks/native/include \
-	system/media/camera/include \
-	system/libhidl/transport/token/1.0/utils/include \
-	system/libhidl/base/include \
-	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
-
-LOCAL_ADDITIONAL_DEPENDENCIES += \
-	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+	system/media/camera/include
 
 LOCAL_SRC_FILES:= \
 	../../exynos/libcamera/common/ExynosCameraInterface.cpp
@@ -148,7 +130,6 @@ LOCAL_CFLAGS += -DFRONT_ROTATION=$(BOARD_FRONT_CAMERA_ROTATION)
 
 LOCAL_SHARED_LIBRARIES:= libutils libcutils libbinder liblog libcamera_client libhardware
 LOCAL_SHARED_LIBRARIES += libexynosutils libhwjpeg libexynosv4l2 libcsc libion_exynos libexynoscamera
-LOCAL_SHARED_LIBRARIES += libui libhidlbase android.hardware.graphics.bufferqueue@1.0
 
 LOCAL_MODULE := camera.$(TARGET_BOOTLOADER_BOARD_NAME)
 
